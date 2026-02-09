@@ -3,6 +3,7 @@ interface Props {
   nodes: Array<{ id: string; lat: number; lon: number }>;
 }
 
+
 const { nodes } = Astro.props;
 
 // Calculate center point (OpenLayers uses lon, lat)
@@ -33,7 +34,9 @@ if (nodes.length > 0) {
 ---
 
 <!-- Load client module from dev-server path so Vite can rewrite imports -->
-<script type="module" src="/src/client/map-client.js"></script>
+<script type="module">
+  import "../client/map-client.js";
+</script>
 
 <style>
   @import 'ol/ol.css';
