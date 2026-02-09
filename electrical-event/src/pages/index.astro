@@ -1,0 +1,96 @@
+---
+import Welcome from '../components/Welcome.astro';
+import Layout from '../layouts/Layout.astro';
+import Map from '../components/Map.astro';
+
+type ImageItem = { url: string; lon: number; lat: number };
+const images: ImageItem[] = [
+  { url: '/image_1.jpg', lon: 174.766527, lat: -36.849960 }, // Cosmo (now Meeso)
+  { url: '/image_2.jpg', lon: 174.772294, lat: -36.850419 }, // Bus Stop
+  { url: '/image_3.jpg', lon: 174.853871, lat: -36.899247 }, // Korean Place
+  { url: '/image_4.jpg', lon: 174.770918, lat: -36.852786 }, // OGGB
+  { url: '/image_5.jpg', lon: 174.855942, lat: -36.906471 }, // Bridge 
+];
+
+function shuffle(array: ImageItem[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+shuffle(images);
+
+const url = 'https://api.openstreetmap.org/api/0.6/map?bbox=173.74,-36.93,174.92,-36.83';
+let nodes: Array<{ id: string; lat: number; lon: number }> = [];
+try {
+  const res = await fetch(url, { headers: { 'User-Agent': 'ChrisV Valentines App (contact via GitHub)' } });
+  if (!res.ok) {
+    console.error(`OpenStreetMap API error: ${res.status} ${res.statusText}`);
+  }
+  const xml = await res.text();
+  const matches = Array.from(xml.matchAll(/<node[^>]*id="(\d+)"[^>]*lat="([^"]+)"[^>]*lon="([^"]+)"/g));
+  nodes = matches.map(m => ({ id: m[1], lat: parseFloat(m[2]), lon: parseFloat(m[3]) }));
+  console.log(`Fetched ${nodes.length} nodes from OpenStreetMap.`);
+} catch (err) {
+  console.error('Error fetching map data:', err);
+}
+---
+
+<Layout>
+  <div class="container">
+    <!-- Left half: Map -->
+    <div class="left-half">
+      <Map {nodes} />
+    </div>
+    
+    <!-- Right half: Centered Image -->
+    <div class="right-half">
+      <div class="image-wrapper">
+        <img 
+          id="guessImage" 
+          src={images[0].url} 
+          alt="A bird." 
+          width="300" 
+          data-images={JSON.stringify(images)} 
+        />
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/client/image-rotator.js"></script>
+</Layout>
+
+<style>
+  .container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .left-half {
+    flex: 1;
+    height: 100%;
+  }
+
+  .right-half {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5; /* Optional: subtle background to distinguish halves */
+  }
+
+  .image-wrapper {
+    border: 4px solid white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+
+  .image-wrapper img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+</style>
