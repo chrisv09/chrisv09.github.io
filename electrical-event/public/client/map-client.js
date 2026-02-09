@@ -1,18 +1,18 @@
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import VectorLayer from 'ol/layer/Vector';
-import OSM from 'ol/source/OSM';
-import VectorSource from 'ol/source/Vector';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
-import LineString from 'ol/geom/LineString';
-import { fromLonLat, toLonLat } from 'ol/proj';
-import Style from 'ol/style/Style';
-import CircleStyle from 'ol/style/Circle';
-import Fill from 'ol/style/Fill';
-import Stroke from 'ol/style/Stroke';
-import { getDistance } from 'ol/sphere';
+import Map from 'https://cdn.skypack.dev/ol/Map';
+import View from 'https://cdn.skypack.dev/ol/View';
+import TileLayer from 'https://cdn.skypack.dev/ol/layer/Tile';
+import VectorLayer from 'https://cdn.skypack.dev/ol/layer/Vector';
+import OSM from 'https://cdn.skypack.dev/ol/source/OSM';
+import VectorSource from 'https://cdn.skypack.dev/ol/source/Vector';
+import Feature from 'https://cdn.skypack.dev/ol/Feature';
+import Point from 'https://cdn.skypack.dev/ol/geom/Point';
+import LineString from 'https://cdn.skypack.dev/ol/geom/LineString';
+import { fromLonLat, toLonLat } from 'https://cdn.skypack.dev/ol/proj';
+import Style from 'https://cdn.skypack.dev/ol/style/Style';
+import CircleStyle from 'https://cdn.skypack.dev/ol/style/Circle';
+import Fill from 'https://cdn.skypack.dev/ol/style/Fill';
+import Stroke from 'https://cdn.skypack.dev/ol/style/Stroke';
+import { getDistance } from 'https://cdn.skypack.dev/ol/sphere';
 
 window.addEventListener("DOMContentLoaded", () => {
 
