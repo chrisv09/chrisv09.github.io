@@ -15,6 +15,8 @@ import Stroke from 'ol/style/Stroke';
 
 import { getDistance } from 'ol/sphere';
 
+window.addEventListener("DOMContentLoaded", () => {
+
 const el = document.getElementById('basicMap');
 if (!el) {
   console.error('map element not found');
@@ -213,3 +215,4 @@ if (!el) {
     console.error('Error initializing OpenLayers map (client module):', e);
   }
 }
+});

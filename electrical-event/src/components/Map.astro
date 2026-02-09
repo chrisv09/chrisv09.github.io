@@ -34,9 +34,7 @@ if (nodes.length > 0) {
 ---
 
 <!-- Load client module from dev-server path so Vite can rewrite imports -->
-<script type="module">
-  import "../client/map-client.js";
-</script>
+
 
 <style>
   @import 'ol/ol.css';
@@ -48,3 +46,7 @@ if (nodes.length > 0) {
     overflow: hidden;
   }
 </style>
+
+<script type="module">
+  import "../client/map-client.js"; // best option
+</script>
