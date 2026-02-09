@@ -23,11 +23,11 @@ window.getCurrentImageCoordinate = () => {
 
 document.addEventListener('guess:made', showNext);
 
+if (images.length) preloadImages(images);
+
 export function preloadImages(urls) {
   urls.forEach(u => {
     const i = new Image();
     i.src = (typeof u === 'string') ? u : u.url;
   });
 }
-
-if (images.length) preloadImages(images);
