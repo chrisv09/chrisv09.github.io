@@ -16,7 +16,7 @@ import { getDistance } from 'https://cdn.skypack.dev/ol/sphere';
 
 // --- Constants ---
 const COUNTDOWN_SECONDS = 15;
-const STAR_THRESHOLDS = { THREE: 1000, TWO: 5000, ONE: 20000 };
+const STAR_THRESHOLDS = { THREE: 1000, TWO: 5000, ONE: 10000 };
 const FALLBACK_COORDS = [
   [174.7665229, -36.8497722],
   [174.772262, -36.850378],
@@ -147,12 +147,12 @@ window.addEventListener('DOMContentLoaded', () => {
       const d = dom();
       if (d.overlayMessage) d.overlayMessage.textContent = mode === 'times-up' ? 'Times up!' : 'Good guess!';
       if (d.distanceDisplay) {
-        d.distanceDisplay.textContent = '';
         d.distanceDisplay.style.display = mode === 'times-up' ? 'none' : '';
+        if (mode === 'times-up') d.distanceDisplay.textContent = '';
       }
       if (d.starsDiv) {
-        d.starsDiv.innerHTML = '';
         d.starsDiv.style.display = mode === 'times-up' ? 'none' : '';
+        if (mode === 'times-up') d.starsDiv.innerHTML = '';
       }
     }
 
@@ -177,11 +177,10 @@ window.addEventListener('DOMContentLoaded', () => {
     function renderStars(container, count) {
       if (!container) return;
       container.innerHTML = '';
-      if (count <= 0) return;
       const src = count === 1 ? '/1-star.png' : `/${count}-stars.png`;
       const img = document.createElement('img');
       img.src = src;
-      img.alt = `${count} stars`;
+      img.alt = count === 0 ? '0 stars' : `${count} star${count === 1 ? '' : 's'}`;
       img.style.width = '100px';
       img.style.height = '32px';
       container.appendChild(img);
@@ -220,6 +219,7 @@ window.addEventListener('DOMContentLoaded', () => {
           }
           setOverlayMode('times-up');
           showOverlay();
+          setupNextRoundButton();
         }
       }, 1000);
       el.dataset.countdownIntervalId = String(countdownInterval);
@@ -277,16 +277,16 @@ window.addEventListener('DOMContentLoaded', () => {
         lineFeature.set('connector', true);
         vectorSource.addFeature(lineFeature);
 
+        // Calculate distance between user and random point
         const c1 = userFeature.getGeometry().getCoordinates();
         const c2 = randFeature.getGeometry().getCoordinates();
         const distanceMeters = getDistance(toLonLat(c1), toLonLat(c2));
         const distanceKm = (distanceMeters / 1000).toFixed(2);
 
         const d = dom();
+        setOverlayMode('guess');
         if (d.distanceDisplay) d.distanceDisplay.textContent = `Distance: ${distanceKm} km`;
         renderStars(d.starsDiv, getStarsForDistance(distanceMeters));
-
-        setOverlayMode('guess');
         stopCountdown();
         showOverlay();
         setupNextRoundButton();
