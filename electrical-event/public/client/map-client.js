@@ -214,8 +214,9 @@ window.addEventListener('DOMContentLoaded', () => {
           const coord = getCurrentImageCoord();
           if (coord) {
             const [lon, lat] = coord;
+            const answerCenter = fromLonLat([lon, lat]);
             addAnswerMarker(lon, lat);
-            map.getView().setCenter(fromLonLat([lon, lat]));
+            map.getView().animate({ center: answerCenter, duration: 1500 });
           }
           setOverlayMode('times-up');
           showOverlay();
@@ -225,18 +226,25 @@ window.addEventListener('DOMContentLoaded', () => {
       el.dataset.countdownIntervalId = String(countdownInterval);
     }
 
-    window.addEventListener('game:start', () => startCountdown(), { once: true });
+    window.addEventListener('guessImage:loaded', () => {
+      const loadingEl = document.getElementById('image-loading');
+      if (loadingEl) loadingEl.classList.remove('is-visible');
+      startCountdown();
+    });
+    window.addEventListener('guessImage:loading', () => {
+      const loadingEl = document.getElementById('image-loading');
+      if (loadingEl) loadingEl.classList.add('is-visible');
+    });
 
     // --- Next round (shared) ---
     function goToNextRound() {
+      removeGuessFeatures();
+      hideOverlay();
       try {
         if (window.showNextGuessImage) window.showNextGuessImage();
       } catch (err) {
         console.error('Error rotating image:', err);
       }
-      removeGuessFeatures();
-      hideOverlay();
-      startCountdown();
     }
 
     function setupNextRoundButton() {

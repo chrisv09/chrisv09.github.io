@@ -51,6 +51,10 @@ try {
           width="300" 
           data-images={JSON.stringify(images)} 
         />
+        <div id="image-loading" class="image-loading" aria-live="polite">
+          <span class="image-loading-spinner"></span>
+          <span class="image-loading-text">Loading…</span>
+        </div>
       </div>
     </div>
   </div>
@@ -59,7 +63,7 @@ try {
   <div id="start-overlay" class="start-overlay">
     <div class="start-overlay-content">
       <h1 class="start-title">ChrizGuessr!</h1>
-      <p class="start-message">Enter password to start</p>
+      <p class="start-message">What's my favourite colour?</p>
       <form id="start-form" class="start-form">
         <input type="password" id="start-password" class="start-password" placeholder="Password" autocomplete="off" />
         <p id="start-error" class="start-error" aria-live="polite"></p>
@@ -71,7 +75,7 @@ try {
   <script is:inline src="/client/image-rotator.js"></script>
   <script is:inline>
     (function() {
-      const PASSWORD = 'abcd';
+      const PASSWORD = 'dark green';
       const overlay = document.getElementById('start-overlay');
       const form = document.getElementById('start-form');
       const passwordInput = document.getElementById('start-password');
@@ -83,6 +87,18 @@ try {
         window.setTimeout(function() {
           overlay.style.display = 'none';
           window.dispatchEvent(new CustomEvent('game:start'));
+          var loadingEl = document.getElementById('image-loading');
+          var img = document.getElementById('guessImage');
+          if (img && loadingEl) {
+            if (img.complete) {
+              window.dispatchEvent(new CustomEvent('guessImage:loaded'));
+            } else {
+              loadingEl.classList.add('is-visible');
+              img.addEventListener('load', function onLoad() {
+                window.dispatchEvent(new CustomEvent('guessImage:loaded'));
+              }, { once: true });
+            }
+          }
         }, 300);
       }
 
@@ -138,6 +154,7 @@ try {
   }
 
   .image-wrapper {
+    position: relative;
     border: 4px solid white;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -148,6 +165,39 @@ try {
     display: block;
     max-width: 100%;
     height: auto;
+  }
+
+  .image-loading {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+  }
+
+  .image-loading.is-visible {
+    display: flex;
+  }
+
+  .image-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: image-loading-spin 0.8s linear infinite;
+  }
+
+  .image-loading-text {
+    font-size: 0.9rem;
+  }
+
+  @keyframes image-loading-spin {
+    to { transform: rotate(360deg); }
   }
 
   /* Start overlay: full screen over both halves */

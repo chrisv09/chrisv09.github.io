@@ -23,12 +23,13 @@ const centerLon = propCenterLon ?? (nodes.length ? nodes.reduce((sum, n) => sum 
     <span id="countdown-number">30</span>
   </div>
   <!-- Overlay for displaying guess result (shown only when timer hits 0) -->
-  <div id="guess-overlay" style="display: none; position: absolute; top: 80%; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 100; border-radius: 8px; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+  <div id="guess-overlay" style="display: none; position: absolute; top: 70%; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 100; border-radius: 8px; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
     <div style="text-align: center;">
+      <div id="stars" style="font-size: 32px; color: gold;"></div>
       <div id="distance-display" style="font-size: 24px; font-weight: bold; color: white; margin-bottom: 8px;"></div>
       <p id="overlay-message" style="color: white; margin: 0; font-size: 14px;">Good guess!</p>
       <!-- Display stars depending on distance -->
-      <div id="stars" style="font-size: 32px; color: gold;"></div>
+      
     
     </div>
     <button id="next-round" type="button" style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Next round</button>

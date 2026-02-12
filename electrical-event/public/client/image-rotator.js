@@ -7,7 +7,14 @@ function showNext() {
   if (!images.length) return;
   idx = (idx + 1) % images.length;
   const item = images[idx];
-  if (img) img.src = (typeof item === 'string') ? item : item.url;
+  if (img) {
+    window.dispatchEvent(new CustomEvent('guessImage:loading'));
+    img.src = (typeof item === 'string') ? item : item.url;
+    img.addEventListener('load', function onLoad() {
+      img.removeEventListener('load', onLoad);
+      window.dispatchEvent(new CustomEvent('guessImage:loaded'));
+    }, { once: true });
+  }
 }
 
 window.showNextGuessImage = showNext;
