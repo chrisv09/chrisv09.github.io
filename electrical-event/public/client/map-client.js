@@ -226,15 +226,35 @@ window.addEventListener('DOMContentLoaded', () => {
       el.dataset.countdownIntervalId = String(countdownInterval);
     }
 
-    window.addEventListener('guessImage:loaded', () => {
+    function onImageReady() {
       const loadingEl = document.getElementById('image-loading');
       if (loadingEl) loadingEl.classList.remove('is-visible');
       startCountdown();
-    });
+    }
+
+    window.addEventListener('guessImage:loaded', onImageReady);
     window.addEventListener('guessImage:loading', () => {
       const loadingEl = document.getElementById('image-loading');
       if (loadingEl) loadingEl.classList.add('is-visible');
     });
+
+    // First-time load: start overlay dispatches game:start then guessImage:loaded.
+    // Module may run after that, so also start timer when game starts if image is already loaded.
+    window.addEventListener('game:start', () => {
+      const img = document.getElementById('guessImage');
+      if (img && img.complete) {
+        onImageReady();
+      } else if (img) {
+        img.addEventListener('load', onImageReady, { once: true });
+      }
+    });
+
+    // If we initialized late (e.g. module loaded after user already clicked Start), start timer now.
+    const startOverlay = document.getElementById('start-overlay');
+    const img = document.getElementById('guessImage');
+    if (startOverlay && startOverlay.style.display === 'none' && img && img.complete) {
+      onImageReady();
+    }
 
     // --- Next round (shared) ---
     function goToNextRound() {
