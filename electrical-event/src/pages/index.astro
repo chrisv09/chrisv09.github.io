@@ -2,29 +2,21 @@
 import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 import Map from '../components/Map.astro';
+import { guessImages as rawImages, type GuessImage } from '../data/guess-images';
 
-type ImageItem = { url: string; lon: number; lat: number };
-const images: ImageItem[] = [
-  { url: '/image_1.jpg', lon: 174.766527, lat: -36.849960 }, // Cosmo (now Meeso)
-  { url: '/image_2.jpg', lon: 174.772294, lat: -36.850419 }, // Bus Stop
-  { url: '/image_3.jpg', lon: 174.853871, lat: -36.899247 }, // Korean Place
-  { url: '/image_4.jpg', lon: 174.770918, lat: -36.852786 }, // OGGB
-  { url: '/image_5.jpg', lon: 174.855942, lat: -36.906471 }, // Bridge 
-  { url: '/image_6.jpg', lon: 174.882699, lat: -36.915875 }, // Dog Walk 1
-  { url: '/image_7.jpg', lon: 174.918679, lat: -36.884599}, // Picnic
-  { url: '/image_8.jpg', lon: 174.841247, lat: -36.913549}, // Whitcoulls
-  { url: '/image_9.jpg', lon: 174.789498, lat: -36.896899}, // Cornwall
-  { url: '/image_10.jpg', lon: 174.8858018, lat: -36.920143}, // Dog Walk 2 
-  { url: '/image_11.jpg', lon: 174.87609319, lat: -36.99840983} // Wiri
-];
-
-function shuffle(array: ImageItem[]) {
-  for (let i = array.length - 1; i > 0; i--) {
+function shuffle<T>(array: T[]): T[] {
+  const out = [...array];
+  for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [out[i], out[j]] = [out[j], out[i]];
   }
+  return out;
 }
-shuffle(images);
+const images = shuffle(rawImages);
+
+// Center the map on guess locations (not OSM nodes) so the game area is in view
+const centerLon = images.length ? images.reduce((s, i) => s + i.lon, 0) / images.length : 174.905;
+const centerLat = images.length ? images.reduce((s, i) => s + i.lat, 0) / images.length : -36.965;
 
 const url = 'https://api.openstreetmap.org/api/0.6/map?bbox=173.74,-36.93,174.92,-36.83';
 let nodes: Array<{ id: string; lat: number; lon: number }> = [];
@@ -46,7 +38,7 @@ try {
   <div class="container">
     <!-- Left half: Map -->
     <div class="left-half">
-      <Map {nodes} />
+      <Map {nodes} centerLat={centerLat} centerLon={centerLon} />
     </div>
     
     <!-- Right half: Centered Image -->
@@ -244,7 +236,6 @@ try {
   .start-title {
     font-size: 2.5rem;
     margin: 0 0 0.5rem;
-    font-family: system-ui, sans-serif;
     letter-spacing: 0.02em;
   }
 
