@@ -6,14 +6,19 @@ export type GuessImage = {
   url: string;
   lon: number;
   lat: number;
+  question?: string;
+  answer?: string;
 };
 
 export const guessImages: GuessImage[] = [
-  { url: '/image_1.jpg', lon: 174.766527, lat: -36.849960 }, // Cosmo (now Meeso)
+  { url: '/image_1.jpg', lon: 174.766527, lat: -36.849960, 
+    question: "What year was this photo taken?", answer: "2024"}, // Cosmo (now Meeso)
   { url: '/image_2.jpg', lon: 174.772294, lat: -36.850419 }, // Bus Stop
   { url: '/image_3.jpg', lon: 174.853871, lat: -36.899247 }, // Korean Place
   { url: '/image_4.jpg', lon: 174.770918, lat: -36.852786 }, // OGGB
-  { url: '/image_5.jpg', lon: 174.855942, lat: -36.906471 }, // Bridge
+  { url: '/image_5.jpg', lon: 174.855942, lat: -36.906471, // Bridge
+    question: "What suburb is this photo in?",
+    answer: "Panmure"},
   { url: '/image_6.jpg', lon: 174.882699, lat: -36.915875 }, // Dog Walk 1
   { url: '/image_7.jpg', lon: 174.918679, lat: -36.884599 }, // Picnic
   { url: '/image_8.jpg', lon: 174.841247, lat: -36.913549 }, // Whitcoulls
@@ -26,10 +31,19 @@ export const guessImages: GuessImage[] = [
   { url: '/image_15.jpg', lon: 174.77099667, lat: -36.84903556 }, // Waterloo Quadrant
   { url: '/image_16.jpg', lon: 174.82623384, lat: -36.91245500 }, // Big J's
   { url: '/image_17.jpg', lon: 174.83736660, lat: -36.90968758 }, // Night Market
-  { url: '/image_18.jpg', lon: 174.83705745, lat: -36.92468037 }, // Sorella Cafe
+  { url: '/image_18.jpg', lon: 174.83705745, lat: -36.92468037, question: "What's the name of this cafe?", answer: 'Sorella Cafe' },
   { url: '/image_19.jpg', lon: 174.79100861, lat: -36.88847654 }, // Pikuniku
   { url: '/image_20.jpg', lon: 174.84153684, lat: -36.91337865 }, // Sylvia Carpark
   { url: '/image_21.jpg', lon: 174.8432811, lat: -36.91938182 }, // Clemow Drive Cafe
-  { url: '/image_22.jpg', lon: 174.83754401, lat: -36.90893459 }, // Wiri
-  { url: '/image_23.jpg', lon: 174.83944196, lat: -36.90817290}, // Wiri
+  { url: '/image_22.jpg', lon: 174.83754401, lat: -36.90893459 }, // Mt Wellington Shopping Centre Cafe
+  { url: '/image_23.jpg', lon: 174.83944196, lat: -36.90817290}, // Sushi Place
+  { url: '/image_24.jpg', lon: 174.76630774, lat: -36.8432752}, // Camera`
+  { url: '/image_25.jpg', lon: 174.85243004, lat: -36.8990824}, // Sri Lankan Place
+  { url: '/image_26.jpg', lon: 174.85174256, lat: -36.8987789,
+    question: "What's the flavour of the pie?", answer: "pumpkin"
+  },
+  { url: '/image_27.jpg', lon: 174.76443832, lat: -36.8497639}, // CityFitness
+  { url: '/image_28.jpg', lon: 174.84141636, lat: -36.9159612}, //
+  { url: '/image_29.jpg', lon: 174.84152682, lat: -36.9162365}, //
+  { url: '/image_30.jpg', lon: 174.84084897, lat: -36.9149028} //
 ];

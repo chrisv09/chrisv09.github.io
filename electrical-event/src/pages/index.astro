@@ -14,6 +14,8 @@ function shuffle<T>(array: T[]): T[] {
 }
 const images = shuffle(rawImages);
 
+const hasAnyExtraQuestion = images.some((img) => img.question && img.answer);
+
 // Center the map on guess locations (not OSM nodes) so the game area is in view
 const centerLon = images.length ? images.reduce((s, i) => s + i.lon, 0) / images.length : 174.905;
 const centerLat = images.length ? images.reduce((s, i) => s + i.lat, 0) / images.length : -36.965;
@@ -41,7 +43,7 @@ try {
       <Map {nodes} centerLat={centerLat} centerLon={centerLon} />
     </div>
     
-    <!-- Right half: Centered Image -->
+    <!-- Right half: Centered Image + extra question underneath -->
     <div class="right-half">
       <div class="image-wrapper">
         <img 
@@ -56,6 +58,16 @@ try {
           <span class="image-loading-text">Loading…</span>
         </div>
       </div>
+      {hasAnyExtraQuestion && (
+        <div id="extra-question" class="extra-question" style="display: none;">
+          <h2 class="extra-question-title">Extra Points Question</h2>
+          <p id="extra-question-text" class="extra-question-text"></p>
+          <form id="extra-question-form" class="extra-question-form">
+            <input type="text" id="extra-question-answer" class="extra-question-answer" placeholder="Answer" autocomplete="off" />
+            <button type="submit" class="extra-question-button" id="extra-question-button">Submit</button>
+          </form>
+        </div>
+      )}
     </div>
   </div>
 
@@ -73,6 +85,58 @@ try {
   </div>
   
   <script is:inline src="/client/image-rotator.js"></script>
+
+  <!-- Question logic -->
+  <script is:inline>
+    
+    (function() {
+
+      const form = document.getElementById('extra-question-form');
+      const guess = document.getElementById('extra-question-answer');
+      const feedbackText = document.getElementById('extra-question-text');
+
+      function syncExtraQuestion() {
+        var block = document.getElementById('extra-question');
+        if (!block) return;
+        var cur = window.getCurrentImage && window.getCurrentImage();
+        var textEl = document.getElementById('extra-question-text');
+        var inputEl = document.getElementById('extra-question-answer');
+        if (cur && cur.question && cur.answer) {
+          block.style.display = '';
+          if (textEl) textEl.textContent = cur.question;
+          if (inputEl) { inputEl.value = ''; inputEl.dataset.expectedAnswer = cur.answer; }
+        } else {
+          block.style.display = 'none';
+          if (inputEl) { inputEl.value = ''; delete inputEl.dataset.expectedAnswer; }
+        }
+      }
+      window.addEventListener('game:start', syncExtraQuestion);
+      window.addEventListener('guessImage:loaded', syncExtraQuestion);
+      if (document.readyState === 'complete') syncExtraQuestion();
+      else window.addEventListener('load', syncExtraQuestion);
+
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var cur = window.getCurrentImage && window.getCurrentImage();
+          var value = guess ? guess.value.trim() : '';
+          if (value === cur.answer) {
+            console.log("correct")
+            feedbackText.textContent = "Correct!"
+            
+          } else {
+            console.log("incorrect")
+            feedbackText.textContent = "Incorrect!"
+          }
+          guess.isContentEditable = False;
+        });
+      }
+    })();
+    
+
+  </script>
+
+  <!-- Start overlay logic -->
   <script is:inline>
     (function() {
       const PASSWORD = 'dark green';
@@ -148,9 +212,12 @@ try {
     flex: 1;
     height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background-color: #f5f5f5; /* Optional: subtle background to distinguish halves */
+    justify-content: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #f5f5f5;
   }
 
   .image-wrapper {
@@ -165,6 +232,62 @@ try {
     display: block;
     max-width: 100%;
     height: auto;
+  }
+
+  .extra-question {
+    width: 100%;
+    max-width: 320px;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e0e0e0;
+  }
+
+  .extra-question-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #333;
+  }
+
+  .extra-question-text {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    color: #555;
+  }
+
+  .extra-question-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .extra-question-answer {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+  }
+
+  .extra-question-answer:focus {
+    border-color: #007bff;
+  }
+
+  .extra-question-button {
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .extra-question-button:hover {
+    background: #0069d9;
   }
 
   .image-loading {
@@ -248,7 +371,7 @@ try {
   }
 
   .start-password:focus {
-    border-color: #e94560;
+    border-color: #3aaa3b;
   }
 
   .start-error {
