@@ -291,7 +291,10 @@
         gameOver = true;
         const d = dom();
         let extraText = ``
-        if (highscore < totalPoints) extraText = ` <br><strong>New highscore!</strong>`;
+        if (highscore < totalPoints) {
+          extraText = ` <br><strong>New highscore!</strong>`;
+          highscore = totalPoints;
+        }
         if (d.overlayMessage) {
           d.overlayMessage.innerHTML = `Game over! Good job <3<br>You got <strong>${totalPoints}</strong> points!` + (extraText || '');
         }
@@ -307,10 +310,12 @@
       }
 
       function goToNextRound() {
+        pointsRound = 0;
         if (gameOver) {
           roundNumber = 0;
           gameOver = false;
           totalStars = 0; 
+          totalPoints = 0;
           const btn = document.getElementById(ID.NEXT_ROUND);
           if (btn) btn.textContent = 'Next round';
         }
