@@ -14,6 +14,8 @@
   import Stroke from 'https://cdn.skypack.dev/ol/style/Stroke';
   import { getDistance } from 'https://cdn.skypack.dev/ol/sphere';
 
+  let bonusEarnedThisRound = false;
+
   // --- Constants ---
   const COUNTDOWN_SECONDS = 15;
   const TOTAL_ROUNDS = 3;
@@ -23,6 +25,7 @@
     [174.772262, -36.850378],
     [174.853815, -36.899273],
   ];
+  const MAX_POINTS_PER_ROUND = 10000;
 
   const ID = {
     MAP: 'basicMap',
@@ -34,7 +37,7 @@
     STARS: 'stars',
     ADD_RANDOM: 'add-random',
     NEXT_ROUND: 'next-round',
-    EXTRA_QUESTION_DIV: 'extra-question'
+    EXTRA_QUESTION_DIV: 'extra-question',
   };
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -120,7 +123,8 @@
         overlayMessage: document.getElementById(ID.OVERLAY_MESSAGE),
         distanceDisplay: document.getElementById(ID.DISTANCE_DISPLAY),
         starsDiv: document.getElementById(ID.STARS),
-        extraQuestionDiv: document.getElementById(ID.EXTRA_QUESTION_DIV)
+        extraQuestionDiv: document.getElementById(ID.EXTRA_QUESTION_DIV),
+        guessButton: document.getElementById(ID.ADD_RANDOM)
       });
 
       // --- Helpers: current image coord ---
@@ -150,7 +154,7 @@
       // --- Helpers: overlay ---
       function setOverlayMode(mode) {
         const d = dom();
-        if (d.overlayMessage) d.overlayMessage.textContent = mode === 'times-up' ? 'Times up!' : 'Good guess!';
+        if (d.overlayMessage) d.overlayMessage.textContent = mode === 'times-up' ? 'Times up!' : `Good guess, you got ${pointsRound} points!`;
         if (d.distanceDisplay) {
           d.distanceDisplay.style.display = mode === 'times-up' ? 'none' : '';
           if (mode === 'times-up') d.distanceDisplay.textContent = '';
@@ -164,11 +168,13 @@
       function showOverlay() {
         const d = dom();
         if (d.overlay) d.overlay.style.display = 'flex';
+        if (d.guessButton) d.guessButton.style.display = 'none'
       }
 
       function hideOverlay() {
         const d = dom();
         if (d.overlay) d.overlay.style.display = 'none';
+        if (d.guessButton) d.guessButton.style.display = 'block'
       }
 
       // --- Helpers: stars ---
@@ -265,12 +271,31 @@
       // --- Rounds & game over ---
       let roundNumber = 1;
       let totalStars = 0;
+      let pointsRound = 0;
+      let totalPoints = 0;
+      let highscore = 0;
       let gameOver = false;
+
+      // Listen for bonus question correct answer
+      window.addEventListener('extraQuestion:correct', () => {
+        bonusEarnedThisRound = true;
+        totalPoints += 5000
+      });
+
+      // Reset bonus on new round
+      window.addEventListener('guessImage:loaded', () => {
+        bonusEarnedThisRound = false;
+      });
 
       function showGameOver() {
         gameOver = true;
         const d = dom();
-        if (d.overlayMessage) d.overlayMessage.textContent = 'Game over! Good job <3';
+        let extraText = ``
+        if (highscore < totalPoints) extraText = ` <br><strong>New highscore!</strong>`;
+        if (d.overlayMessage) {
+          d.overlayMessage.innerHTML = `Game over! Good job <3<br>You got <strong>${totalPoints}</strong> points!` + (extraText || '');
+        }
+        
         if (d.distanceDisplay) {
           d.distanceDisplay.style.display = '';
           d.distanceDisplay.textContent = `Total: ${totalStars} / ${TOTAL_ROUNDS * 3} stars`;
@@ -285,6 +310,9 @@
         if (gameOver) {
           roundNumber = 0;
           gameOver = false;
+          totalStars = 0; 
+          const btn = document.getElementById(ID.NEXT_ROUND);
+          if (btn) btn.textContent = 'Next round';
         }
         if (roundNumber >= TOTAL_ROUNDS) {
           showGameOver();
@@ -311,44 +339,53 @@
       let fallbackIndex = 0;
       document.getElementById(ID.ADD_RANDOM)?.addEventListener('click', () => {
         try {
+          const d = dom(); // Get DOM refs at the start
           const features = vectorSource.getFeatures();
           const userFeature = features.find((f) => f.get('user'));
           if (!userFeature) {
             alert('Place a base point by clicking the map first.');
             return;
           }
-
+      
           const coordPair = getCurrentImageCoord() || FALLBACK_COORDS[fallbackIndex++ % FALLBACK_COORDS.length];
           const [lon, lat] = coordPair;
           const newCoord = fromLonLat([lon, lat]);
-
+      
           const existingRandom = features.find((f) => f.get('random'));
           if (existingRandom) vectorSource.removeFeature(existingRandom);
           const existingConnector = features.find((f) => f.get('connector'));
           if (existingConnector) vectorSource.removeFeature(existingConnector);
-
-          extraQuestionDiv.style.display = 'none';
-
+      
+          // Hide extra question when guess is made
+          if (d.extraQuestionDiv) d.extraQuestionDiv.style.display = 'none';
+      
           const randFeature = new Feature(new Point(newCoord));
           randFeature.set('random', true);
           randFeature.set('originId', userFeature.get('id') || null);
           randFeature.set('created', Date.now());
           vectorSource.addFeature(randFeature);
-
+      
           const line = new LineString([userFeature.getGeometry().getCoordinates(), randFeature.getGeometry().getCoordinates()]);
           const lineFeature = new Feature(line);
           lineFeature.set('connector', true);
           vectorSource.addFeature(lineFeature);
-
+      
           // Calculate distance between user and random point
           const c1 = userFeature.getGeometry().getCoordinates();
           const c2 = randFeature.getGeometry().getCoordinates();
           const distanceMeters = getDistance(toLonLat(c1), toLonLat(c2));
           const distanceKm = (distanceMeters / 1000).toFixed(2);
-
-          const d = dom();
+      
           const stars = getStarsForDistance(distanceMeters);
           totalStars += stars;
+
+          pointsRound = Math.max(0,Math.round(MAX_POINTS_PER_ROUND - distanceMeters));
+
+          // Round to nearest 10
+          pointsRound = Math.ceil(pointsRound / 10) * 10;
+          totalPoints += pointsRound;
+
+          d.guessButton.style.display = 'none'
           setOverlayMode('guess');
           if (d.distanceDisplay) d.distanceDisplay.textContent = `Distance: ${distanceKm} km`;
           renderStars(d.starsDiv, stars);
